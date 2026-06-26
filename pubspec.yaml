@@ -1,0 +1,43 @@
+name: json_dynamic_home
+description: "A powerful JSON-to-Flutter-UI rendering engine. Build entire Flutter screens from JSON configuration. Perfect for server-driven UI, no-code app builders, and dynamic content delivery."
+version: 0.1.0
+homepage: https://github.com/sachinkumar/json_dynamic_home
+repository: https://github.com/sachinkumar/json_dynamic_home
+issue_tracker: https://github.com/sachinkumar/json_dynamic_home/issues
+
+environment:
+  sdk: ^3.11.5
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ─── Typography ───────────────────────────────────────────
+  google_fonts: ^6.2.1
+
+  # ─── Images ───────────────────────────────────────────────
+  cached_network_image: ^3.4.1
+
+  # ─── Icons ────────────────────────────────────────────────
+  lucide_icons: ^0.257.0
+
+  # ─── HTTP / Networking ────────────────────────────────────
+  http: ^1.2.2
+
+  # ─── URL Launcher ─────────────────────────────────────────
+  url_launcher: ^6.3.1
+
+  # ─── Cache / Storage ──────────────────────────────────────
+  shared_preferences: ^2.2.3
+
+  # ─── UI / Animations ──────────────────────────────────────
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
