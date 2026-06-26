@@ -7,7 +7,7 @@
 /// ## Quick Start
 ///
 /// ```dart
-/// import 'package:flutter_json_widget_engine/flutter_json_widget_engine.dart';
+/// import 'package:flutter_json_dynamic_home/flutter_json_dynamic_home.dart';
 ///
 /// // 1. Load JSON from any URL
 /// final loader = JsonLoaderService();
@@ -17,7 +17,7 @@
 /// final engine = JsonWidgetEngine();
 /// final widget = engine.buildScreen(config!, context);
 /// ```
-library flutter_json_widget_engine;
+library flutter_json_dynamic_home;
 
 // ─── Models ──────────────────────────────────────────────────
 export 'src/models/widget_node.dart';

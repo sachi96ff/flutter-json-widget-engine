@@ -24,8 +24,8 @@ Add it to your `pubspec.yaml` as a local path or git dependency:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_json_widget_engine:
-    path: ../flutter-json-widget-engine # or your specific path
+  flutter_json_dynamic_home:
+    path: ../flutter-json-dynamic-home # or your specific path
 ```
 
 ---
@@ -37,7 +37,7 @@ Configure the global network behavior in your `main.dart`. You only need to do t
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_json_widget_engine/flutter_json_widget_engine.dart';
+import 'package:flutter_json_dynamic_home/flutter_json_dynamic_home.dart';
 
 void main() {
   // Set the base URL where your JSON files are hosted
@@ -279,7 +279,7 @@ The engine acts as a secure bridge. It **never** stores or sends your data to an
 Implement the `JsonAnalyticsDelegate` interface in your app:
 
 ```dart
-import 'package:flutter_json_widget_engine/flutter_json_widget_engine.dart';
+import 'package:flutter_json_dynamic_home/flutter_json_dynamic_home.dart';
 
 class MyAnalyticsHandler implements JsonAnalyticsDelegate {
   @override
