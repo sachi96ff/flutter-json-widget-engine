@@ -126,6 +126,16 @@ class WidgetRegistry {
     registerSimple('Paragraph', DynamicText.build);
     registerSimple('NetworkImage', DynamicImage.build);
     registerSimple('Divider', _buildDivider);
+
+    // ─── New Advanced Widgets ─────────────────────────────────
+    registerEngine('Stack', _buildStack);
+    registerEngine('Wrap', _buildWrap);
+    registerSimple('Chip', _buildChip);
+    registerSimple('TextInput', _buildTextInput);
+    registerSimple('ProgressBar', _buildProgressBar);
+    registerEngine('Badge', _buildBadge);
+    registerSimple('Avatar', _buildAvatar);
+    registerSimple('Switch', _buildSwitch);
   }
 
   /// Built-in divider widget.
@@ -142,6 +152,251 @@ class WidgetRegistry {
       indent: indent,
       endIndent: indent,
       color: color,
+    );
+  }
+
+  /// Stack widget — overlapping children.
+  static Widget _buildStack(WidgetNode node, BuildContext context, JsonWidgetEngine engine) {
+    final alignStr = node.getString('alignment', 'center') ?? 'center';
+    final alignMap = <String, AlignmentGeometry>{
+      'topLeft': Alignment.topLeft,
+      'topCenter': Alignment.topCenter,
+      'topRight': Alignment.topRight,
+      'centerLeft': Alignment.centerLeft,
+      'center': Alignment.center,
+      'centerRight': Alignment.centerRight,
+      'bottomLeft': Alignment.bottomLeft,
+      'bottomCenter': Alignment.bottomCenter,
+      'bottomRight': Alignment.bottomRight,
+    };
+
+    final children = node.children
+        .map((child) => engine.buildWidget(child, context))
+        .toList();
+
+    return Stack(
+      alignment: alignMap[alignStr] ?? Alignment.center,
+      children: children.isEmpty
+          ? [const SizedBox.shrink()]
+          : children,
+    );
+  }
+
+  /// Wrap widget — flow layout.
+  static Widget _buildWrap(WidgetNode node, BuildContext context, JsonWidgetEngine engine) {
+    final spacing = node.getDouble('spacing', 8) ?? 8;
+    final runSpacing = node.getDouble('runSpacing', 8) ?? 8;
+    final alignStr = node.getString('alignment', 'start') ?? 'start';
+    final alignMap = <String, WrapAlignment>{
+      'start': WrapAlignment.start,
+      'center': WrapAlignment.center,
+      'end': WrapAlignment.end,
+      'spaceBetween': WrapAlignment.spaceBetween,
+      'spaceAround': WrapAlignment.spaceAround,
+    };
+
+    final children = node.children
+        .map((child) => engine.buildWidget(child, context))
+        .toList();
+
+    return Wrap(
+      spacing: spacing,
+      runSpacing: runSpacing,
+      alignment: alignMap[alignStr] ?? WrapAlignment.start,
+      children: children,
+    );
+  }
+
+  /// Chip widget — small label/tag.
+  static Widget _buildChip(WidgetNode node, BuildContext context) {
+    final text = node.getString('text', 'Chip') ?? 'Chip';
+    final variant = node.getString('variant', 'filled') ?? 'filled';
+    final bgColor = _parseColor(node.style?.background ?? '#EEF2FF') ?? const Color(0xFFEEF2FF);
+    final textColor = _parseColor(node.style?.textColor ?? '#4338CA') ?? const Color(0xFF4338CA);
+    final radius = node.style?.radius ?? 20;
+
+    if (variant == 'outlined') {
+      return Chip(
+        label: Text(text, style: TextStyle(color: textColor, fontSize: node.style?.fontSize ?? 12)),
+        backgroundColor: Colors.transparent,
+        shape: StadiumBorder(side: BorderSide(color: textColor, width: 1.5)),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+      );
+    }
+
+    return Chip(
+      label: Text(text, style: TextStyle(color: textColor, fontSize: node.style?.fontSize ?? 12)),
+      backgroundColor: bgColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+    );
+  }
+
+  /// TextInput widget — text field preview.
+  static Widget _buildTextInput(WidgetNode node, BuildContext context) {
+    final label = node.getString('label', '') ?? '';
+    final placeholder = node.getString('placeholder', 'Enter text...') ?? 'Enter text...';
+    final hint = node.getString('hint', '') ?? '';
+    final inputType = node.getString('input_type', 'text') ?? 'text';
+    final required = node.getBool('required');
+    final radius = node.style?.radius ?? 12;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label.isNotEmpty) ...[
+          Row(
+            children: [
+              Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+              if (required) const Text(' *', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+          const SizedBox(height: 6),
+        ],
+        TextField(
+          readOnly: true,
+          obscureText: inputType == 'password',
+          decoration: InputDecoration(
+            hintText: placeholder,
+            helperText: hint.isNotEmpty ? hint : null,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(radius)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// ProgressBar widget — linear progress indicator.
+  static Widget _buildProgressBar(WidgetNode node, BuildContext context) {
+    final value = (node.getDouble('value', 0.65) ?? 0.65).clamp(0.0, 1.0);
+    final label = node.getString('label', '') ?? '';
+    final showLabel = node.getBool('show_label', true);
+    final trackColor = _parseColor(node.properties['track_color']?.toString() ?? '') ?? const Color(0xFFE5E7EB);
+    final barColor = _parseColor(node.properties['bar_color']?.toString() ?? '') ?? const Color(0xFF6366F1);
+    final radius = node.style?.radius ?? 4;
+    final height = node.style?.height ?? 8;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (showLabel && label.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280))),
+          ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: SizedBox(
+            height: height,
+            child: LinearProgressIndicator(
+              value: value,
+              backgroundColor: trackColor,
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Badge widget — notification badge.
+  static Widget _buildBadge(WidgetNode node, BuildContext context, JsonWidgetEngine engine) {
+    final count = node.getInt('count', 0) ?? 0;
+    final maxCount = node.getInt('max_count', 99) ?? 99;
+    final showDot = node.getBool('show_dot');
+    final badgeColor = _parseColor(node.properties['badge_color']?.toString() ?? '') ?? Colors.red;
+
+    final children = node.children
+        .map((child) => engine.buildWidget(child, context))
+        .toList();
+
+    final child = children.isNotEmpty
+        ? children.first
+        : const SizedBox(width: 24, height: 24);
+
+    if (showDot) {
+      return Badge(
+        smallSize: 10,
+        backgroundColor: badgeColor,
+        child: child,
+      );
+    }
+
+    if (count > 0) {
+      final display = count > maxCount ? '$maxCount+' : '$count';
+      return Badge(
+        label: Text(display, style: const TextStyle(fontSize: 10, color: Colors.white)),
+        backgroundColor: badgeColor,
+        child: child,
+      );
+    }
+
+    return child;
+  }
+
+  /// Avatar widget — circular user image.
+  static Widget _buildAvatar(WidgetNode node, BuildContext context) {
+    final imageUrl = node.getString('image_url', '') ?? '';
+    final text = node.getString('text', 'U') ?? 'U';
+    final size = node.getDouble('size', 48) ?? 48;
+    final bgColor = _parseColor(node.style?.background ?? '#6366F1') ?? const Color(0xFF6366F1);
+
+    if (imageUrl.isNotEmpty) {
+      return CircleAvatar(
+        radius: size / 2,
+        backgroundColor: bgColor,
+        backgroundImage: NetworkImage(imageUrl),
+      );
+    }
+
+    return CircleAvatar(
+      radius: size / 2,
+      backgroundColor: bgColor,
+      child: Text(
+        text.substring(0, text.length > 2 ? 2 : text.length).toUpperCase(),
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: size * 0.4,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  /// Switch widget — toggle switch.
+  static Widget _buildSwitch(WidgetNode node, BuildContext context) {
+    final label = node.getString('label', '') ?? '';
+    final subtitle = node.getString('subtitle', '') ?? '';
+    final value = node.getBool('value');
+    final activeColor = _parseColor(node.properties['active_color']?.toString() ?? '') ?? const Color(0xFF6366F1);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (label.isNotEmpty)
+                Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF1E293B))),
+              if (subtitle.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
+                ),
+            ],
+          ),
+        ),
+        Switch(
+          value: value,
+          onChanged: null, // Read-only preview
+          activeThumbColor: activeColor,
+        ),
+      ],
     );
   }
 

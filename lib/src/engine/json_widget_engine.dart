@@ -1,7 +1,6 @@
 // lib/dynamic_ui/engine/json_widget_engine.dart
 
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/widget_node.dart';
 import '../models/dynamic_screen_config.dart';
 import 'widget_registry.dart';
@@ -173,26 +172,81 @@ class JsonWidgetEngine {
     final bgImage = config.backgroundImage;
 
     if (bgImage != null && bgImage.isNotEmpty) {
-      // Use a Stack to ensure the image takes 100% width and maintains its aspect ratio
-      return Stack(
-        children: [
-          if (bgColor != null)
-            Positioned.fill(
-              child: ColoredBox(color: bgColor),
-            ),
-          SizedBox(
-            width: double.infinity,
-            child: CachedNetworkImage(
-              imageUrl: bgImage,
-              fit: BoxFit.fitWidth,
-              alignment: Alignment.topCenter,
-            ),
+      // Parse fit from config
+      BoxFit fit = BoxFit.cover;
+      switch (config.backgroundFit) {
+        case 'contain':
+          fit = BoxFit.contain;
+          break;
+        case 'fill':
+          fit = BoxFit.fill;
+          break;
+        case 'none':
+          fit = BoxFit.none;
+          break;
+        case 'cover':
+        default:
+          fit = BoxFit.cover;
+      }
+
+      // Parse position from config
+      Alignment alignment = Alignment.center;
+      switch (config.backgroundPosition) {
+        case 'top':
+          alignment = Alignment.topCenter;
+          break;
+        case 'bottom':
+          alignment = Alignment.bottomCenter;
+          break;
+        case 'left':
+          alignment = Alignment.centerLeft;
+          break;
+        case 'right':
+          alignment = Alignment.centerRight;
+          break;
+        case 'top left':
+          alignment = Alignment.topLeft;
+          break;
+        case 'top right':
+          alignment = Alignment.topRight;
+          break;
+        case 'bottom left':
+          alignment = Alignment.bottomLeft;
+          break;
+        case 'bottom right':
+          alignment = Alignment.bottomRight;
+          break;
+        default:
+          alignment = Alignment.center;
+      }
+
+      // Parse repeat from config
+      ImageRepeat repeat = ImageRepeat.noRepeat;
+      switch (config.backgroundRepeat) {
+        case 'repeat':
+          repeat = ImageRepeat.repeat;
+          break;
+        case 'repeat-x':
+          repeat = ImageRepeat.repeatX;
+          break;
+        case 'repeat-y':
+          repeat = ImageRepeat.repeatY;
+          break;
+        default:
+          repeat = ImageRepeat.noRepeat;
+      }
+
+      return Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          image: DecorationImage(
+            image: NetworkImage(bgImage),
+            fit: fit,
+            alignment: alignment,
+            repeat: repeat,
           ),
-          SizedBox(
-            width: double.infinity,
-            child: content,
-          ),
-        ],
+        ),
+        child: content,
       );
     } else if (bgColor != null) {
       return ColoredBox(color: bgColor, child: content);

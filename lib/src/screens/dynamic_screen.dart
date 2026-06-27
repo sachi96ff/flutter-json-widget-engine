@@ -9,6 +9,8 @@ import '../models/dynamic_screen_config.dart';
 import '../services/json_loader_service.dart';
 import '../engine/style_parser.dart';
 import '../widgets/content/dynamic_icon.dart';
+import '../engine/action_handler.dart';
+import '../models/widget_node.dart';
 
 
 /// Universal screen that renders its entire UI from a JSON file.
@@ -137,6 +139,17 @@ class _DynamicScreenState extends State<DynamicScreen> {
       }
     }
 
+    // Resolve status bar style from config
+    SystemUiOverlayStyle statusBarStyle;
+    final configBarStyle = _config?.statusBarStyle;
+    if (configBarStyle == 'light') {
+      statusBarStyle = SystemUiOverlayStyle.light;
+    } else if (configBarStyle == 'dark') {
+      statusBarStyle = SystemUiOverlayStyle.dark;
+    } else {
+      statusBarStyle = isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
+    }
+
     final scaffold = Scaffold(
       backgroundColor: Colors.transparent,
       appBar: (_config == null || _config!.showHeader)
@@ -168,13 +181,50 @@ class _DynamicScreenState extends State<DynamicScreen> {
             )
           : null,
       body: _buildBody(context, isDark),
+      // FAB support
+      floatingActionButton: _buildFab(context),
     );
 
+    // Build background decoration
     DecorationImage? bgImage;
     if (_config?.backgroundImage != null && _config!.backgroundImage!.isNotEmpty) {
+      // Parse fit
+      BoxFit fit = BoxFit.cover;
+      switch (_config?.backgroundFit) {
+        case 'contain': fit = BoxFit.contain; break;
+        case 'fill': fit = BoxFit.fill; break;
+        case 'none': fit = BoxFit.none; break;
+        default: fit = BoxFit.cover;
+      }
+
+      // Parse position
+      Alignment alignment = Alignment.center;
+      switch (_config?.backgroundPosition) {
+        case 'top': alignment = Alignment.topCenter; break;
+        case 'bottom': alignment = Alignment.bottomCenter; break;
+        case 'left': alignment = Alignment.centerLeft; break;
+        case 'right': alignment = Alignment.centerRight; break;
+        case 'top left': alignment = Alignment.topLeft; break;
+        case 'top right': alignment = Alignment.topRight; break;
+        case 'bottom left': alignment = Alignment.bottomLeft; break;
+        case 'bottom right': alignment = Alignment.bottomRight; break;
+        default: alignment = Alignment.center;
+      }
+
+      // Parse repeat
+      ImageRepeat repeat = ImageRepeat.noRepeat;
+      switch (_config?.backgroundRepeat) {
+        case 'repeat': repeat = ImageRepeat.repeat; break;
+        case 'repeat-x': repeat = ImageRepeat.repeatX; break;
+        case 'repeat-y': repeat = ImageRepeat.repeatY; break;
+        default: repeat = ImageRepeat.noRepeat;
+      }
+
       bgImage = DecorationImage(
         image: NetworkImage(_config!.backgroundImage!),
-        fit: BoxFit.cover,
+        fit: fit,
+        alignment: alignment,
+        repeat: repeat,
       );
     }
 
@@ -194,15 +244,46 @@ class _DynamicScreenState extends State<DynamicScreen> {
       }
     }
 
+    // Safe area handling
+    final useSafeArea = _config?.safeArea ?? true;
+
+    Widget body = Container(
+      decoration: BoxDecoration(
+        color: bg,
+        image: bgImage,
+        gradient: bgGradient,
+      ),
+      child: useSafeArea
+          ? SafeAreaView(child: scaffold)
+          : scaffold,
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-      child: Container(
-        decoration: BoxDecoration(
-          color: bg,
-          image: bgImage,
-          gradient: bgGradient,
-        ),
-        child: scaffold,
+      value: statusBarStyle,
+      child: body,
+    );
+  }
+
+  Widget? _buildFab(BuildContext context) {
+    if (_config?.fab == null || _config!.fab!['icon'] == null) return null;
+    final fabIcon = _config!.fab!['icon'] as String?;
+    final fabBg = StyleParser.parseColor(_config!.fab!['background'] as String?) ?? Theme.of(context).colorScheme.primary;
+    
+    return FloatingActionButton(
+      backgroundColor: fabBg,
+      onPressed: () {
+        // Handle FAB action via engine action handler
+        if (_config!.fab!['on_click'] != null) {
+          final action = ClickAction.fromJson(_config!.fab!['on_click'] as Map<String, dynamic>);
+          final callback = ActionHandler.buildCallback(context, action: action);
+          if (callback != null) {
+            callback();
+          }
+        }
+      },
+      child: Icon(
+        fabIcon != null ? DynamicIcon.resolveIcon(fabIcon) : Icons.add,
+        color: Colors.white,
       ),
     );
   }
@@ -226,11 +307,28 @@ class _DynamicScreenState extends State<DynamicScreen> {
     }
 
     // Success — render from JSON
-    return RefreshIndicator(
-      onRefresh: _refresh,
-      color: Theme.of(context).colorScheme.primary,
-      child: _engine.buildScreen(_config!, context),
-    );
+    final usePullToRefresh = _config?.pullToRefresh ?? true;
+    
+    if (usePullToRefresh) {
+      return RefreshIndicator(
+        onRefresh: _refresh,
+        color: Theme.of(context).colorScheme.primary,
+        child: _engine.buildScreen(_config!, context),
+      );
+    }
+    
+    return _engine.buildScreen(_config!, context);
+  }
+}
+
+// Helper widget to handle safe area conditionally
+class SafeAreaView extends StatelessWidget {
+  final Widget child;
+  const SafeAreaView({super.key, required this.child});
+  
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(child: child);
   }
 }
 

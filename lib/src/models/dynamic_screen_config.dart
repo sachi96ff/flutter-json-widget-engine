@@ -29,8 +29,18 @@ class DynamicScreenConfig {
   final String? headerBgColor;
   final bool scrollable;
   final dynamic height; // "auto" or number
+  final String? minHeight;
   final String? background;
   final String? backgroundImage;
+  final String? backgroundFit;      // 'cover' | 'contain' | 'fill' | 'none'
+  final String? backgroundRepeat;   // 'no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y'
+  final String? backgroundPosition; // 'center' | 'top' | 'bottom' etc.
+  final String? backgroundAttachment; // 'fixed' | 'scroll'
+  final bool safeArea;
+  final String? statusBarStyle;     // 'light' | 'dark' | 'auto'
+  final String? transition;         // 'slide' | 'fade' | 'scale' | 'none'
+  final bool pullToRefresh;
+  final Map<String, dynamic>? fab;
   final List<String>? gradientColors;
   final EdgeInsets? padding;
   final EdgeInsets? margin;
@@ -48,8 +58,18 @@ class DynamicScreenConfig {
     this.headerBgColor,
     this.scrollable = true,
     this.height = 'auto',
+    this.minHeight,
     this.background,
     this.backgroundImage,
+    this.backgroundFit,
+    this.backgroundRepeat,
+    this.backgroundPosition,
+    this.backgroundAttachment,
+    this.safeArea = true,
+    this.statusBarStyle,
+    this.transition,
+    this.pullToRefresh = true,
+    this.fab,
     this.gradientColors,
     this.padding,
     this.margin,
@@ -78,8 +98,18 @@ class DynamicScreenConfig {
       headerBgColor: json['header_bg_color'] as String?,
       scrollable: json['scrollable'] as bool? ?? true,
       height: json['height'] ?? 'auto',
+      minHeight: json['min_height']?.toString(),
       background: json['background'] as String?,
       backgroundImage: (json['background_image'] ?? json['backgroundImage']) as String?,
+      backgroundFit: (json['background_fit'] ?? json['backgroundFit']) as String?,
+      backgroundRepeat: (json['background_repeat'] ?? json['backgroundRepeat']) as String?,
+      backgroundPosition: (json['background_position'] ?? json['backgroundPosition']) as String?,
+      backgroundAttachment: (json['background_attachment'] ?? json['backgroundAttachment']) as String?,
+      safeArea: json['safe_area'] as bool? ?? true,
+      statusBarStyle: json['status_bar_style'] as String?,
+      transition: json['transition'] as String?,
+      pullToRefresh: json['pull_to_refresh'] as bool? ?? true,
+      fab: json['fab'] is Map<String, dynamic> ? json['fab'] as Map<String, dynamic> : null,
       gradientColors: (json['gradient_colors'] as List?)?.map((e) => e.toString()).toList(),
       padding: WidgetStyle.parseEdgeInsets(json['padding']),
       margin: WidgetStyle.parseEdgeInsets(json['margin']),
@@ -101,8 +131,18 @@ class DynamicScreenConfig {
       if (headerBgColor != null) 'header_bg_color': headerBgColor,
       'scrollable': scrollable,
       'height': height,
+      if (minHeight != null) 'min_height': minHeight,
       'background': background,
       'background_image': backgroundImage,
+      if (backgroundFit != null) 'background_fit': backgroundFit,
+      if (backgroundRepeat != null) 'background_repeat': backgroundRepeat,
+      if (backgroundPosition != null) 'background_position': backgroundPosition,
+      if (backgroundAttachment != null) 'background_attachment': backgroundAttachment,
+      'safe_area': safeArea,
+      if (statusBarStyle != null) 'status_bar_style': statusBarStyle,
+      if (transition != null) 'transition': transition,
+      'pull_to_refresh': pullToRefresh,
+      if (fab != null) 'fab': fab,
       if (gradientColors != null) 'gradient_colors': gradientColors,
       'widgets': [],
     };

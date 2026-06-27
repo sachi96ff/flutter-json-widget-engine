@@ -1,6 +1,6 @@
 name: flutter_json_dynamic_home
 description: "A powerful JSON-to-Flutter-UI rendering engine. Build entire Flutter screens from JSON configuration. Perfect for server-driven UI, no-code app builders, and dynamic content delivery."
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/sachi96ff/flutter-json-dynamic-home
 repository: https://github.com/sachi96ff/flutter-json-dynamic-home
 issue_tracker: https://github.com/sachi96ff/flutter-json-dynamic-home/issues
