@@ -1,3 +1,7 @@
+## 0.1.3
+
+* Enhanced `DynamicCard`, `DynamicRow`, and `DynamicHorizontalList` with better styling and background images.
+
 ## 0.1.1
 
 * Updated documentation URLs to pagekart.in.
