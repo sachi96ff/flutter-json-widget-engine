@@ -41,6 +41,7 @@ class DynamicHorizontalList {
     Widget list = ListView.separated(
       scrollDirection: Axis.horizontal,
       itemCount: items.length,
+      shrinkWrap: height == null,
       padding: node.style?.padding ?? EdgeInsets.zero,
       separatorBuilder: (context, index) => SizedBox(width: spacing),
       itemBuilder: (context, index) {
@@ -52,11 +53,11 @@ class DynamicHorizontalList {
       },
     );
 
-    // Height is required for horizontal list
-    final resolvedHeight = height ?? 180;
-    return SizedBox(
-      height: resolvedHeight,
-      child: list,
-    );
+    // Height is required for horizontal list, but use intrinsic if not set
+    if (height != null) {
+      return SizedBox(height: height, child: list);
+    }
+    // When no height specified, try to use intrinsic height
+    return SizedBox(height: 180, child: list);
   }
 }

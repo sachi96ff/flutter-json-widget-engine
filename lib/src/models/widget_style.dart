@@ -29,6 +29,8 @@ class WidgetStyle {
   final double? letterSpacing;
   final double? lineHeight;
   final String? textAlign;
+  final String? backgroundImage;
+  final String? backgroundFit;
 
   const WidgetStyle({
     this.background,
@@ -53,6 +55,8 @@ class WidgetStyle {
     this.letterSpacing,
     this.lineHeight,
     this.textAlign,
+    this.backgroundImage,
+    this.backgroundFit,
   });
 
   factory WidgetStyle.fromJson(Map<String, dynamic> json) {
@@ -83,6 +87,8 @@ class WidgetStyle {
       letterSpacing: _toDouble(json['letterSpacing'] ?? json['letter_spacing']),
       lineHeight: _toDouble(json['lineHeight'] ?? json['line_height']),
       textAlign: (json['textAlign'] ?? json['text_align']) as String?,
+      backgroundImage: (json['backgroundImage'] ?? json['background_image']) as String?,
+      backgroundFit: (json['backgroundFit'] ?? json['background_fit']) as String?,
     );
   }
 

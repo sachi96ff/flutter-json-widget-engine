@@ -30,6 +30,8 @@ class DynamicRow {
       node.getString('crossAxisAlignment') ?? node.getString('cross_axis_alignment'),
     );
     final spacing = node.getDouble('spacing', 0);
+    final padding = node.style?.padding;
+    final margin = node.style?.margin;
 
     final children = <Widget>[];
     for (int i = 0; i < node.children.length; i++) {
@@ -39,11 +41,23 @@ class DynamicRow {
       }
     }
 
-    return Row(
+    Widget row = Row(
       mainAxisAlignment: mainAxis,
       crossAxisAlignment: crossAxis,
       mainAxisSize: MainAxisSize.max,
       children: children,
     );
+
+    // Apply padding if set
+    if (padding != null) {
+      row = Padding(padding: padding, child: row);
+    }
+
+    // Apply margin if set
+    if (margin != null) {
+      row = Padding(padding: margin, child: row);
+    }
+
+    return row;
   }
 }

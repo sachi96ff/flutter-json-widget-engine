@@ -131,11 +131,9 @@ class WidgetRegistry {
     registerEngine('Stack', _buildStack);
     registerEngine('Wrap', _buildWrap);
     registerSimple('Chip', _buildChip);
-    registerSimple('TextInput', _buildTextInput);
     registerSimple('ProgressBar', _buildProgressBar);
     registerEngine('Badge', _buildBadge);
     registerSimple('Avatar', _buildAvatar);
-    registerSimple('Switch', _buildSwitch);
   }
 
   /// Built-in divider widget.
@@ -229,42 +227,6 @@ class WidgetRegistry {
       backgroundColor: bgColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
       padding: const EdgeInsets.symmetric(horizontal: 4),
-    );
-  }
-
-  /// TextInput widget — text field preview.
-  static Widget _buildTextInput(WidgetNode node, BuildContext context) {
-    final label = node.getString('label', '') ?? '';
-    final placeholder = node.getString('placeholder', 'Enter text...') ?? 'Enter text...';
-    final hint = node.getString('hint', '') ?? '';
-    final inputType = node.getString('input_type', 'text') ?? 'text';
-    final required = node.getBool('required');
-    final radius = node.style?.radius ?? 12;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (label.isNotEmpty) ...[
-          Row(
-            children: [
-              Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
-              if (required) const Text(' *', style: TextStyle(color: Colors.red)),
-            ],
-          ),
-          const SizedBox(height: 6),
-        ],
-        TextField(
-          readOnly: true,
-          obscureText: inputType == 'password',
-          decoration: InputDecoration(
-            hintText: placeholder,
-            helperText: hint.isNotEmpty ? hint : null,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(radius)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          ),
-        ),
-      ],
     );
   }
 
@@ -363,40 +325,6 @@ class WidgetRegistry {
           fontWeight: FontWeight.w700,
         ),
       ),
-    );
-  }
-
-  /// Switch widget — toggle switch.
-  static Widget _buildSwitch(WidgetNode node, BuildContext context) {
-    final label = node.getString('label', '') ?? '';
-    final subtitle = node.getString('subtitle', '') ?? '';
-    final value = node.getBool('value');
-    final activeColor = _parseColor(node.properties['active_color']?.toString() ?? '') ?? const Color(0xFF6366F1);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (label.isNotEmpty)
-                Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF1E293B))),
-              if (subtitle.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
-                ),
-            ],
-          ),
-        ),
-        Switch(
-          value: value,
-          onChanged: null, // Read-only preview
-          activeThumbColor: activeColor,
-        ),
-      ],
     );
   }
 

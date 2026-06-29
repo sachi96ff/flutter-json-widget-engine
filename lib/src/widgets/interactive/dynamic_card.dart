@@ -46,6 +46,8 @@ class DynamicCard {
     final hasShadow = style?.shadow ?? false;
     final width = StyleParser.resolveWidth(style, context);
     final height = StyleParser.resolveHeight(style, context);
+    final backgroundImage = style?.backgroundImage;
+    final backgroundFit = style?.backgroundFit;
 
     // Build click action
     final onTap = ActionHandler.buildCallback(context, action: node.clickAction, analytics: node.analytics);
@@ -56,20 +58,46 @@ class DynamicCard {
     if (node.children.isNotEmpty) {
       final alignStr = node.getString('alignment') ?? 'start';
       CrossAxisAlignment crossAlign;
+      MainAxisAlignment mainAlign;
       switch (alignStr) {
-        case 'center': crossAlign = CrossAxisAlignment.center; break;
-        case 'end': crossAlign = CrossAxisAlignment.end; break;
-        default: crossAlign = CrossAxisAlignment.start; break;
+        case 'center':
+          crossAlign = CrossAxisAlignment.center;
+          mainAlign = MainAxisAlignment.center;
+          break;
+        case 'end':
+          crossAlign = CrossAxisAlignment.end;
+          mainAlign = MainAxisAlignment.start;
+          break;
+        default:
+          crossAlign = CrossAxisAlignment.start;
+          mainAlign = MainAxisAlignment.start;
+          break;
       }
 
       cardContent = Column(
         crossAxisAlignment: crossAlign,
+        mainAxisAlignment: mainAlign,
         mainAxisSize: MainAxisSize.min,
         children: node.children.map((child) => engine.buildWidget(child, context)).toList(),
       );
     } else {
       // Default card layout from properties
       cardContent = _buildDefaultContent(node, context, isDark);
+    }
+
+    // Build decoration with optional background image
+    DecorationImage? decorationImage;
+    if (backgroundImage != null && backgroundImage.isNotEmpty) {
+      BoxFit fit;
+      switch (backgroundFit) {
+        case 'contain': fit = BoxFit.contain; break;
+        case 'fill': fit = BoxFit.fill; break;
+        default: fit = BoxFit.cover; break;
+      }
+      decorationImage = DecorationImage(
+        image: NetworkImage(backgroundImage),
+        fit: fit,
+      );
     }
 
     return GestureDetector(
@@ -79,10 +107,12 @@ class DynamicCard {
         height: height,
         padding: padding,
         margin: margin,
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: bgColor,
+          color: decorationImage != null ? null : bgColor,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(color: borderColor),
+          image: decorationImage,
           boxShadow: hasShadow
               ? [
                   BoxShadow(
